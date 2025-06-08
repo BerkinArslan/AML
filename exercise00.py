@@ -7,8 +7,8 @@ pd.set_option('display.max_columns', None)
 steel_plates_faults = fetch_ucirepo(id=198)
 
 # data (as pandas dataframes)
-X = steel_plates_faults.data.features
-Y = steel_plates_faults.data.targets
+X = steel_plates_faults.data_degisti.features
+Y = steel_plates_faults.data_degisti.targets
 print(X)
 # metadata
 print(steel_plates_faults.metadata)

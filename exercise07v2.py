@@ -1,11 +1,12 @@
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split, KFold
 import pandas as pd
-import random
+from sklearn.preprocessing import StandardScaler
 from matplotlib import pyplot as plt
+
 
 
 from sklearn.ensemble import GradientBoostingClassifier
@@ -183,6 +184,8 @@ if __name__ == '__main__':
     y = y.to_numpy()
     y = y[~np.isnan(X).any(axis = 1)]
     X = X[~np.isnan(X).any(axis = 1)]
+    scaler = StandardScaler()
+    X = scaler.fit_transform(X)
     accuracy_of_rfc = evaluate_cv(RandomForestClassifier, fitter=lambda model, x, y: model.fit(x, y),
                 predictor=lambda model, x: model.predict(x), x = X, y = y)
     X_train, X_test, y_train, y_test = train_test_split(X, y)
@@ -271,8 +274,8 @@ if __name__ == '__main__':
     mean_total_acc.append(mean_acc)
     accs = []
     names.append('KNeighborsClassifier')
-    list_ = [2, 3, 4, 5, 6]
-    for i in [2, 3, 4, 5, 6]:
+    list_ = [3, 4, 5, 6, 10, 25]
+    for i in [3, 4, 5, 6, 10, 25]:
         acc = evaluate_cv(DecisionTreeClassifier, lambda model, x, y: model.fit(x, y),
                     predictor=lambda model, x: model.predict(x), x=X, y=y, k=5, max_depth=i)
         accs.append(acc)
@@ -285,8 +288,8 @@ if __name__ == '__main__':
     mean_total_acc.append(mean_acc)
     accs = []
     names.append('DecisionTreeClassifier')
-    list_ = [2, 3, 4, 5, 6]
-    for i in [2, 3, 4, 5, 6]:
+    list_ = [20, 50, 100, 200]
+    for i in [20, 50, 100, 200]:
         acc = evaluate_cv(RandomForestClassifier, lambda model, x, y: model.fit(x, y),
                     predictor=lambda model, x: model.predict(x), x=X, y=y, k=5, n_estimators=i)
         accs.append(acc)
@@ -299,6 +302,19 @@ if __name__ == '__main__':
     mean_total_acc.append(mean_acc)
     accs = []
     names.append('RandomForestClassifier')
+    for i in [10, 20, 50, 100]:
+        acc = evaluate_cv(AdaBoostClassifier, lambda model, x, y: model.fit(x, y),
+                    predictor=lambda model, x: model.predict(x), x=X, y=y, k=5, estimator= DecisionTreeClassifier(max_depth=100),  n_estimators=i)
+        accs.append(acc)
+    max_index = accs.index(max(accs))
+    max_hyper_parameter = list_[max_index]
+    best_hyperparameters.append(max_hyper_parameter)
+    max_accuracy = accs[max_index]
+    best_acc.append(max_accuracy)
+    mean_acc = sum(accs) / len(accs)
+    mean_total_acc.append(mean_acc)
+    accs = []
+    names.append('AdaBoost')
 
     df_choose_best_hyperparameter_dict = {
         'Name of the model': [],
@@ -313,6 +329,10 @@ if __name__ == '__main__':
     df_choose_best_hyperparameter = pd.DataFrame(df_choose_best_hyperparameter_dict)
     print(df_choose_best_hyperparameter)
     plt.bar(names, mean_total_acc)
+    max_score = max(mean_total_acc)
+    min_score = min(mean_total_acc)
+    margin = (max_score - min_score) / 5
+    plt.ylim(min_score - margin, max_score + margin)
     plt.show()
         ##################################################################################
 

@@ -210,6 +210,7 @@ if __name__ == '__main__':
     for i, xi in enumerate(x):
         array = xi
         results = NN.forward_pass_single(array)
+        print(results)
         result = NN.get_result()
         loss = NN.binary_cross_entropy_loss(result, np.array([y[i]]))
         results_batch_.append(loss)
